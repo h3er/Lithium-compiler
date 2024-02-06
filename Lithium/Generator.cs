@@ -1,7 +1,5 @@
-// ReSharper disable InconsistentNaming
-// ReSharper disable IdentifierTypo
-// ReSharper disable StringLiteralTypo
 #pragma warning disable 8618, 8629
+
 namespace Lithium;
 
 class Generator {
@@ -52,27 +50,17 @@ class Generator {
         return false;
     }
 
-    private void evalCompOps(){
-        switch(consume().type) {
-            case TokenTypes.eqTo:
-                jumpCmd = "jne";
-                break;
-            case TokenTypes.notEqTo:
-                jumpCmd = "je";
-                break;
-            case TokenTypes.greaterThan:
-                jumpCmd = "jge";
-                break;
-            case TokenTypes.greaterThanEq:
-                jumpCmd = "jg";
-                break;
-            case TokenTypes.lessThan:
-                jumpCmd = "jbe";
-                break;
-            case TokenTypes.lessThanEq:
-                jumpCmd = "jb";
-                break;
-        }
+    private void evalCompOps()
+    {
+        jumpCmd = consume().type switch
+        {
+            TokenTypes.eqTo => "jne",
+            TokenTypes.notEqTo => "je",
+            TokenTypes.greaterThan => "jge",
+            TokenTypes.greaterThanEq => "jg",
+            TokenTypes.lessThan => "jbe",
+            TokenTypes.lessThanEq => "jb"
+        };
     }
     
     private string evalSmallExpr() {
@@ -89,7 +77,7 @@ class Generator {
         Console.WriteLine("identifiers.index: " + identifiers.IndexOf(peek().Value.value));
         Console.WriteLine("funcOffset: " + funcOffset);
         identifiers.ForEach(Console.WriteLine);
-        return "QWORD [rsp + " + ((stackSize - identifiers.IndexOf(consume().value)) * 8) + "] ;; 7";
+        return "QWORD [rsp + " + ((stackSize - identifiers.IndexOf(consume().value) + funcOffset) * 8) + "] ;; 7";
     }
 
     private string evalExpr(int min_prec = 1) {
@@ -282,9 +270,14 @@ class Generator {
                     identifiers.Add("peenisnsi");
                     appendASM("    jmp " + otherLabel);
                     appendASM(label + ":");
+                    funcOffset++;
                     generateCode(TokenTypes.closeCurley);
-                    handleScope();
+                    if (peek().Value.type == TokenTypes.closeCurley)
+                    {
+                        handleScope();   
+                    }
                     appendASM(otherLabel + ":");
+                    funcOffset--;
                     break;
                 case TokenTypes._return:
                     consume();
@@ -350,6 +343,13 @@ class Generator {
                             } else {
                                 appendASM("    mov rdi, QWORD [rsp + " + (identifiers.Count - identifiers.IndexOf(consume().value) + funcOffset) * 8 + "] ;; 2");
                             }
+                            Console.WriteLine("stackSize: " + stackSize);
+                            Console.WriteLine("identifiers.Count: " + identifiers.Count);
+                            Console.WriteLine("functions[l][paramCount]: " + functions[l][paramCount]);
+                            Console.WriteLine("identifiers.index: " + identifiers.IndexOf(peek().Value.value));
+                            Console.WriteLine("identifiers.index: " + identifiers.IndexOf(functions[l][paramCount]));
+                            Console.WriteLine("funcOffset: " + funcOffset);
+                            identifiers.ForEach(Console.WriteLine);
                             appendASM("    mov [rsp + " + (stackSize - identifiers.IndexOf(functions[l][paramCount]) + funcOffset) * 8 + "], rdi ;; 1");
                             paramCount++;
                             if(peek().Value.type == TokenTypes.comma) {

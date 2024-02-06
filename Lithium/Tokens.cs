@@ -1,6 +1,7 @@
-namespace Lithium;
 #pragma warning disable 8618, 8629
-// ReSharper disable InconsistentNaming
+
+namespace Lithium;
+
 enum TokenTypes {
     //keywords
     _exit,

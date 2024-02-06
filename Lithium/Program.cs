@@ -12,8 +12,7 @@ static class Compiler {
             tokens = tok.tokenizeCode()
         };
         gen.generateCode();
-        using(StreamWriter rw =  new StreamWriter("testCode.asm")) {
-            rw.Write(gen.asm);
-        }
+        using StreamWriter rw =  new StreamWriter("testCode.asm");
+        rw.Write(gen.asm);
     }
 }

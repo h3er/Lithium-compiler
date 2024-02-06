@@ -1,18 +1,17 @@
-using System.Text;
-// ReSharper disable InconsistentNaming
-
 #pragma warning disable 8618, 8629
+
+using System.Text;
+
 namespace Lithium;
 
 class Tokenizer {
     private int index = -1;
-    private string code;
+    private readonly string code;
 
     public Tokenizer(string path)
     {
-        using(StreamReader sr = new StreamReader(path, Encoding.UTF8)) {
-            code = sr.ReadToEnd();
-        }
+        using StreamReader sr = new StreamReader(path, Encoding.UTF8);
+        code = sr.ReadToEnd();
     }
 
     private char? peek(int n = 1) {
@@ -28,7 +27,7 @@ class Tokenizer {
     }
 
     public List<Token> tokenizeCode() {
-        List<Token> tokens = new List<Token>();
+        List<Token> tokens = [];
         string buf = "";
         while(peek() != null) {
             if(Char.IsLetter((char)peek())) {

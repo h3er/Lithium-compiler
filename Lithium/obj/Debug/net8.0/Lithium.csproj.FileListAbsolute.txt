@@ -12,3 +12,4 @@
 /home/h3er/RiderProjects/Lithium/Lithium/obj/Debug/net8.0/Lithium.pdb
 /home/h3er/RiderProjects/Lithium/Lithium/obj/Debug/net8.0/Lithium.genruntimeconfig.cache
 /home/h3er/RiderProjects/Lithium/Lithium/obj/Debug/net8.0/ref/Lithium.dll
+/home/h3er/RiderProjects/Lithium/Lithium/obj/Debug/net8.0/Lithium.sourcelink.json

@@ -28,6 +28,7 @@ l0:
     mov rax, 60
     syscall
     add rsp, 8
+    ret
 l1:
     mov rdi, 4 ;; 3
     mov [rsp + 8], rdi ;; 1
@@ -35,7 +36,7 @@ l1:
     mov [rsp + 0], rdi ;; 1
     call l0
     add rsp, 16
-    push QWORD [rsp + 24] ;; 7
+    push QWORD [rsp + 16] ;; 7
     pop rdi
     mov rax, 60
     syscall
