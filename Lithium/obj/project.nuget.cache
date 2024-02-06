@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "9efzI4smxXxbu2atzBpKFmBT646N4aDTsiKG1pxdcSdH4ZGgFDqVG/qDWB885JnFZKBdov/qGdUFiQ2bcNdnyg==",
+  "success": true,
+  "projectFilePath": "/home/h3er/RiderProjects/Lithium/Lithium/Lithium.csproj",
+  "expectedPackageFiles": [
+    "/home/h3er/.nuget/packages/microsoft.aspnetcore.app.ref/8.0.1/microsoft.aspnetcore.app.ref.8.0.1.nupkg.sha512"
+  ],
+  "logs": []
+}

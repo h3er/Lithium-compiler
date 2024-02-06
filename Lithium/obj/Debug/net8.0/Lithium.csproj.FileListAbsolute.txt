@@ -1,0 +1,14 @@
+/home/h3er/RiderProjects/Lithium/Lithium/bin/Debug/net8.0/Lithium
+/home/h3er/RiderProjects/Lithium/Lithium/bin/Debug/net8.0/Lithium.deps.json
+/home/h3er/RiderProjects/Lithium/Lithium/bin/Debug/net8.0/Lithium.runtimeconfig.json
+/home/h3er/RiderProjects/Lithium/Lithium/bin/Debug/net8.0/Lithium.dll
+/home/h3er/RiderProjects/Lithium/Lithium/bin/Debug/net8.0/Lithium.pdb
+/home/h3er/RiderProjects/Lithium/Lithium/obj/Debug/net8.0/Lithium.GeneratedMSBuildEditorConfig.editorconfig
+/home/h3er/RiderProjects/Lithium/Lithium/obj/Debug/net8.0/Lithium.AssemblyInfoInputs.cache
+/home/h3er/RiderProjects/Lithium/Lithium/obj/Debug/net8.0/Lithium.AssemblyInfo.cs
+/home/h3er/RiderProjects/Lithium/Lithium/obj/Debug/net8.0/Lithium.csproj.CoreCompileInputs.cache
+/home/h3er/RiderProjects/Lithium/Lithium/obj/Debug/net8.0/Lithium.dll
+/home/h3er/RiderProjects/Lithium/Lithium/obj/Debug/net8.0/refint/Lithium.dll
+/home/h3er/RiderProjects/Lithium/Lithium/obj/Debug/net8.0/Lithium.pdb
+/home/h3er/RiderProjects/Lithium/Lithium/obj/Debug/net8.0/Lithium.genruntimeconfig.cache
+/home/h3er/RiderProjects/Lithium/Lithium/obj/Debug/net8.0/ref/Lithium.dll

@@ -1,0 +1,11 @@
+int x = 44;
+int y = 17;
+int z = 42;
+
+func calc(int num1, int num2){
+    int ne = x + y + z - num2;
+    exit(ne);
+}
+
+calc(4, 7);
+exit(x);
