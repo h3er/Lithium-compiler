@@ -1,3 +1,5 @@
+// ReSharper disable StringLiteralTypo
+// ReSharper disable IdentifierTypo
 #pragma warning disable 8618, 8629
 
 namespace Lithium;
@@ -5,9 +7,9 @@ namespace Lithium;
 class Generator {
     private int stackSize, labelCount, index = -1, funcOffset = -1;
     private string jumpCmd = "jz", endLabel;
-    private List<int> scopes = [], identifierSize = [];
-    private List<string> identifiers = [];
-    private Dictionary<string, List<string>> functions = new Dictionary<string, List<string>>();
+    private readonly List<int> scopes = [];
+    private readonly List<string> identifiers = [];
+    private readonly Dictionary<string, List<string>> functions = new Dictionary<string, List<string>>();
     public List<Token> tokens = [];
     public string asm = "global _start\n_start:\n";
 
@@ -19,8 +21,11 @@ class Generator {
         }
     }
 
-    private Token consume(int n = 1) {
-        index += n;
+    private Token consume(TokenTypes? check = null) {
+        if (peek().Value.type != check && check != null) {
+            throw new Exception("Expected: " + check);
+        }
+        index++;
         return tokens[index];
     }
 
@@ -59,18 +64,19 @@ class Generator {
             TokenTypes.greaterThan => "jge",
             TokenTypes.greaterThanEq => "jg",
             TokenTypes.lessThan => "jbe",
-            TokenTypes.lessThanEq => "jb"
+            TokenTypes.lessThanEq => "jb",
+            _ => throw new Exception("what??? how?????")
         };
     }
     
     private string evalSmallExpr() {
         if(peek().Value.value == "openParen") {
-            consume();
+            consume(TokenTypes.openParen);
             string val = evalExpr();
             consume();
             return val;
         } else if(peek().Value.type == TokenTypes.intLit) {
-            return consume().value;
+            return consume(TokenTypes.intLit).value;
         }
         Console.WriteLine("stackSize: " + stackSize);
         Console.WriteLine("identifiers.Count: " + identifiers.Count);
@@ -146,9 +152,11 @@ class Generator {
         while(peek() != null && peek().Value.type != condition) {
             switch(peek().Value.type) {
                 case TokenTypes._exit:
-                    consume(2);
+                    consume(TokenTypes._exit);
+                    consume(TokenTypes.openParen);
                     evalExpr();
-                    consume(2);
+                    consume(TokenTypes.closeParen);
+                    consume(TokenTypes.semi);
                     pop("rdi");
                     appendASM("    mov rax, 60");
                     appendASM("    syscall");
@@ -156,9 +164,10 @@ class Generator {
                 case TokenTypes._if:
                     int oldStackSize = stackSize;
                     string label = createLabel();
-                    consume(2);
+                    consume(TokenTypes._if);
+                    consume(TokenTypes.openParen);
                     evalExpr();
-                    consume();
+                    consume(TokenTypes.closeParen);
                     pop("rdi");
                     if(oldStackSize == stackSize) {
                         appendASM("    test rdi, rdi");
@@ -182,9 +191,10 @@ class Generator {
                 case TokenTypes._elif:
                     oldStackSize = stackSize;
                     label = createLabel();
-                    consume(2);
+                    consume(TokenTypes._elif);
+                    consume(TokenTypes.openParen);
                     evalExpr();
-                    consume();
+                    consume(TokenTypes.closeParen);
                     pop("rdi");
                     if(oldStackSize == stackSize) {
                         appendASM("    test rdi, rdi");
@@ -207,7 +217,7 @@ class Generator {
                     }
                     break;
                 case TokenTypes._else:
-                    consume();
+                    consume(TokenTypes._else);
                     generateCode(TokenTypes.closeCurley);
                     appendASM("    jmp " + endLabel);
                     appendASM(endLabel + ":");
@@ -215,9 +225,10 @@ class Generator {
                 case TokenTypes._for:
                     label = createLabel();
                     string otherLabel = createLabel();
-                    consume(2);
+                    consume(TokenTypes._for);
+                    consume(TokenTypes.openParen);
                     evalExpr();
-                    consume();
+                    consume(TokenTypes.closeParen);
                     pop("rbx");
                     appendASM(label + ":");
                     generateCode(TokenTypes.closeCurley);
@@ -232,9 +243,10 @@ class Generator {
                     otherLabel = createLabel();
                     oldStackSize = stackSize;
                     appendASM(label + ":");
-                    consume(2);
+                    consume(TokenTypes._while);
+                    consume(TokenTypes.openParen);
                     evalExpr();
-                    consume();
+                    consume(TokenTypes.closeParen);
                     pop("rdi");
                     if(oldStackSize == stackSize) {
                         appendASM("    test rdi, rdi");
@@ -250,22 +262,21 @@ class Generator {
                     appendASM(otherLabel + ":");
                     break;
                 case TokenTypes._func:
-                    consume();
+                    consume(TokenTypes._func);
                     label = createLabel();
                     otherLabel = createLabel();
-                    string name = consume().value;
+                    string name = consume(TokenTypes.identifier).value;
                     functions.Add(name, [label]);
                     while(peek().Value.type != TokenTypes.closeParen) {
                         if(peek().Value.type == TokenTypes.identifier) {
                             identifiers.Add(peek().Value.value);
-                            identifierSize.Add(1);
-                            functions[name].Add(consume().value);
+                            functions[name].Add(consume(TokenTypes.identifier).value);
                             push("193");
                         } else {
-                            consume();
+                            consume(TokenTypes.comma);
                         }
                     }
-                    consume();
+                    consume(TokenTypes.closeParen);
                     handleScope();
                     identifiers.Add("peenisnsi");
                     appendASM("    jmp " + otherLabel);
@@ -280,47 +291,25 @@ class Generator {
                     funcOffset--;
                     break;
                 case TokenTypes._return:
-                    consume();
+                    consume(TokenTypes._return);
                     if(peek().Value.type == TokenTypes.semi) {
-                        consume();
+                        consume(TokenTypes.semi);
                         handleScope();
                         appendASM("    ret");
                         return;
                     } else {
                         //check return type, if it returns create extra space at the top of the stack for value
-                        Console.WriteLine("return value, not implemented");
-                        evalExpr();
+                        throw new Exception("Not implemented");
                     }
-                    break;
                 case TokenTypes._int:
-                    consume();
-                    if(peek().Value.type == TokenTypes.openSquare){
-                        consume();
-                        identifierSize.Add(Convert.ToInt32(peek().Value.value));
-                        appendASM("    mov rdi, " + consume().value);
-                        appendASM("    sal rdi, 3");
-                        appendASM("    sub rsp, rdi");
-                        consume();
-                        identifiers.Add(consume().value);
-                        consume(2);
-                        while(peek().Value.type != TokenTypes.closeSquare){
-                            if(peek().Value.type == TokenTypes.comma){
-                                consume();
-                            }else{
-                                
-                            }
-                        }
-                        consume(2);
-                    } else{
-                        identifiers.Add(consume().value);
-                        identifierSize.Add(1);
-                        consume();
-                        evalExpr();
-                        consume();
-                    }
+                    consume(TokenTypes._int);
+                    identifiers.Add(consume(TokenTypes.identifier).value);
+                    consume(TokenTypes.eq);
+                    evalExpr();
+                    consume(TokenTypes.semi);
                     break;
                 case TokenTypes.identifier:
-                    string l = consume().value;
+                    string l = consume(TokenTypes.identifier).value;
                     if(identifiers.IndexOf(l) != -1) {
                         int loc = identifiers.IndexOf(l);
                         if(peek().Value.type == TokenTypes.increment || peek().Value.type == TokenTypes.decrement) {
@@ -328,20 +317,20 @@ class Generator {
                             appendASM(consume().type == TokenTypes.increment ? "    inc rdi" : "    dec rdi");
                             appendASM("    mov [rsp + " + (identifiers.Count - loc + funcOffset) * 8 + "], rdi ;; 5");
                         } else {
-                            consume();
+                            consume(TokenTypes.eq);
                             evalExpr();
                             pop("rdi");
                             appendASM("    mov [rsp + " + (identifiers.Count - loc + funcOffset) * 8 + "], rdi ;; 4");
                         }
-                        consume();
+                        consume(TokenTypes.semi);
                     } else {
                         int paramCount = 1;
-                        consume();
+                        consume(TokenTypes.openParen);
                         while(peek().Value.type != TokenTypes.closeParen) {
                             if(peek().Value.type == TokenTypes.intLit) {
-                                appendASM("    mov rdi, " + consume().value + " ;; 3");
+                                appendASM("    mov rdi, " + consume(TokenTypes.intLit).value + " ;; 3");
                             } else {
-                                appendASM("    mov rdi, QWORD [rsp + " + (identifiers.Count - identifiers.IndexOf(consume().value) + funcOffset) * 8 + "] ;; 2");
+                                appendASM("    mov rdi, QWORD [rsp + " + (identifiers.Count - identifiers.IndexOf(consume(TokenTypes.identifier).value) + funcOffset) * 8 + "] ;; 2");
                             }
                             Console.WriteLine("stackSize: " + stackSize);
                             Console.WriteLine("identifiers.Count: " + identifiers.Count);
@@ -353,13 +342,14 @@ class Generator {
                             appendASM("    mov [rsp + " + (stackSize - identifiers.IndexOf(functions[l][paramCount]) + funcOffset) * 8 + "], rdi ;; 1");
                             paramCount++;
                             if(peek().Value.type == TokenTypes.comma) {
-                                consume();
+                                consume(TokenTypes.comma);
                             }
                         }
                         appendASM("    call " + functions[l][0]);
                         appendASM("    add rsp, " + (paramCount - 1) * 8);
                         stackSize -= (paramCount - 1);
-                        consume(2);
+                        consume(TokenTypes.closeParen);
+                        consume(TokenTypes.semi);
                     }
                     break;
                 case TokenTypes.openCurley:

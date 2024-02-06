@@ -1,4 +1,4 @@
-namespace Lithium;
+﻿namespace Lithium;
 
 static class Compiler {
     static void Main(string[] args) {
@@ -10,7 +10,7 @@ static class Compiler {
             tokens = tok.tokenizeCode()
         };
         gen.generateCode();
-        using StreamWriter sw = new StreamWriter("testCode.asm");
+        using StreamWriter sw =  new StreamWriter("testCode.asm");
         sw.Write(gen.asm);
     }
 }
