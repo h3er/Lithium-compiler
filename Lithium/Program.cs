@@ -1,5 +1,3 @@
-﻿#pragma warning disable 8618, 8629
-
 namespace Lithium;
 
 static class Compiler {
@@ -12,7 +10,7 @@ static class Compiler {
             tokens = tok.tokenizeCode()
         };
         gen.generateCode();
-        using StreamWriter rw =  new StreamWriter("testCode.asm");
-        rw.Write(gen.asm);
+        using StreamWriter sw = new StreamWriter("testCode.asm");
+        sw.Write(gen.asm);
     }
 }
