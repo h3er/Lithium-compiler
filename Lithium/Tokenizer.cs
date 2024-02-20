@@ -77,6 +77,25 @@ class Tokenizer {
                     default:
                         tokens.Add(new Token(TokenTypes.identifier, buf));
                         break;
+
+                        /*
+                        tokens.Add( buf switch {
+                        "exit" => new Token(TokenTypes._exit),
+                        "print" => new Token(TokenTypes._print),
+                        "if" => new Token(TokenTypes._if),
+                        "elif" => tokens.Add(new Token(TokenTypes._elif),
+                        "else" => tokens.Add(new Token(TokenTypes._else),
+                        "for" => tokens.Add(new Token(TokenTypes._for),
+                        "while" => tokens.Add(new Token(TokenTypes._while),
+                        "func" => tokens.Add(new Token(TokenTypes._func),
+                        "return" => tokens.Add(new Token(TokenTypes._return),
+                        "int" => tokens.Add(new Token(TokenTypes._int),
+                        "bool" => tokens.Add(new Token(TokenTypes._bool),
+                        "char" => tokens.Add(new Token(TokenTypes._char),
+                        "void" => tokens.Add(new Token(TokenTypes._void),
+                        _ => tokens.Add(new Token(TokenTypes.identifier, buf)
+                        });
+                        */
                 }
                 buf = "";
 
