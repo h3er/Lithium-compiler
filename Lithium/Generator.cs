@@ -147,6 +147,7 @@ class Generator {
         while(peek() != null && peek().Value.type != condition) {
             switch(peek().Value.type) {
                 case TokenTypes._exit:
+                    appendASM("; exit begin");
                     consume(TokenTypes._exit);
                     consume(TokenTypes.openParen);
                     evalExpr();
@@ -155,10 +156,12 @@ class Generator {
                     pop("rdi");
                     appendASM("    mov rax, 60");
                     appendASM("    syscall");
+                    appendASM("; exit end");
                     break;
                 case TokenTypes._if:
                     int oldStackSize = stackSize;
                     string label = createLabel();
+                    appendASM("; if begin");
                     consume(TokenTypes._if);
                     consume(TokenTypes.openParen);
                     evalExpr();
@@ -182,10 +185,12 @@ class Generator {
                     } else {
                         appendASM(label + ":");
                     }
+                    appendASM("; if end");
                     break;
                 case TokenTypes._elif:
                     oldStackSize = stackSize;
                     label = createLabel();
+                    appendASM("; elif begin");
                     consume(TokenTypes._elif);
                     consume(TokenTypes.openParen);
                     evalExpr();
@@ -210,14 +215,18 @@ class Generator {
                         appendASM("    jmp " + endLabel);
                         appendASM(endLabel + ":");
                     }
+                    appendASM("; elif end");
                     break;
                 case TokenTypes._else:
+                    appendASM("; else begin");
                     consume(TokenTypes._else);
                     generateCode(TokenTypes.closeCurley);
                     appendASM("    jmp " + endLabel);
                     appendASM(endLabel + ":");
+                    appendASM("; else end");
                     break;
                 case TokenTypes._for:
+                    appendASM("; for begin");
                     label = createLabel();
                     string otherLabel = createLabel();
                     consume(TokenTypes._for);
@@ -232,8 +241,10 @@ class Generator {
                     appendASM("    jz " + otherLabel);
                     appendASM("    jmp " + label);
                     appendASM(otherLabel + ":");
+                    appendASM("; for end");
                     break;
                 case TokenTypes._while:
+                    appendASM("; while begin");
                     label = createLabel();
                     otherLabel = createLabel();
                     oldStackSize = stackSize;
@@ -255,8 +266,10 @@ class Generator {
                     appendASM("    jmp " + label);
                     handleScope();
                     appendASM(otherLabel + ":");
+                    appendASM("; while end");
                     break;
                 case TokenTypes._func:
+                    appendASM("; func begin");
                     consume(TokenTypes._func);
                     label = createLabel();
                     otherLabel = createLabel();
@@ -284,13 +297,16 @@ class Generator {
                     }
                     appendASM(otherLabel + ":");
                     funcOffset--;
+                    appendASM("; func end");
                     break;
                 case TokenTypes._return:
+                    appendASM("; return begin");
                     consume(TokenTypes._return);
                     if(peek().Value.type == TokenTypes.semi) {
                         consume(TokenTypes.semi);
                         handleScope();
                         appendASM("    ret");
+                        appendASM("; return end");
                         return;
                     } else {
                         //check return type, if it returns create extra space at the top of the stack for value
