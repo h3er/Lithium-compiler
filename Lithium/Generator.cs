@@ -78,12 +78,7 @@ class Generator {
         } else if(peek().Value.type == TokenTypes.intLit) {
             return consume(TokenTypes.intLit).value;
         }
-        Console.WriteLine("stackSize: " + stackSize);
-        Console.WriteLine("identifiers.Count: " + identifiers.Count);
-        Console.WriteLine("identifiers.index: " + identifiers.IndexOf(peek().Value.value));
-        Console.WriteLine("funcOffset: " + funcOffset);
-        identifiers.ForEach(Console.WriteLine);
-        return "QWORD [rsp + " + ((stackSize - identifiers.IndexOf(consume().value) + funcOffset) * 8) + "] ;; 7";
+        return "QWORD [rsp + " + ((stackSize - identifiers.IndexOf(consume().value) + funcOffset) * 8) + "]";
     }
 
     private string evalExpr(int min_prec = 1) {
@@ -313,14 +308,14 @@ class Generator {
                     if(identifiers.IndexOf(l) != -1) {
                         int loc = identifiers.IndexOf(l);
                         if(peek().Value.type == TokenTypes.increment || peek().Value.type == TokenTypes.decrement) {
-                            appendASM("    mov rdi, QWORD [rsp + " + (identifiers.Count - loc + funcOffset) * 8 + "] ;; 6");
+                            appendASM("    mov rdi, QWORD [rsp + " + (identifiers.Count - loc + funcOffset) * 8 + "]");
                             appendASM(consume().type == TokenTypes.increment ? "    inc rdi" : "    dec rdi");
-                            appendASM("    mov [rsp + " + (identifiers.Count - loc + funcOffset) * 8 + "], rdi ;; 5");
+                            appendASM("    mov [rsp + " + (identifiers.Count - loc + funcOffset) * 8 + "], rdi");
                         } else {
                             consume(TokenTypes.eq);
                             evalExpr();
                             pop("rdi");
-                            appendASM("    mov [rsp + " + (identifiers.Count - loc + funcOffset) * 8 + "], rdi ;; 4");
+                            appendASM("    mov [rsp + " + (identifiers.Count - loc + funcOffset) * 8 + "], rdi");
                         }
                         consume(TokenTypes.semi);
                     } else {
@@ -328,18 +323,11 @@ class Generator {
                         consume(TokenTypes.openParen);
                         while(peek().Value.type != TokenTypes.closeParen) {
                             if(peek().Value.type == TokenTypes.intLit) {
-                                appendASM("    mov rdi, " + consume(TokenTypes.intLit).value + " ;; 3");
+                                appendASM("    mov rdi, " + consume(TokenTypes.intLit).value + "");
                             } else {
-                                appendASM("    mov rdi, QWORD [rsp + " + (identifiers.Count - identifiers.IndexOf(consume(TokenTypes.identifier).value) + funcOffset) * 8 + "] ;; 2");
+                                appendASM("    mov rdi, QWORD [rsp + " + (identifiers.Count - identifiers.IndexOf(consume(TokenTypes.identifier).value) + funcOffset) * 8 + "]");
                             }
-                            Console.WriteLine("stackSize: " + stackSize);
-                            Console.WriteLine("identifiers.Count: " + identifiers.Count);
-                            Console.WriteLine("functions[l][paramCount]: " + functions[l][paramCount]);
-                            Console.WriteLine("identifiers.index: " + identifiers.IndexOf(peek().Value.value));
-                            Console.WriteLine("identifiers.index: " + identifiers.IndexOf(functions[l][paramCount]));
-                            Console.WriteLine("funcOffset: " + funcOffset);
-                            identifiers.ForEach(Console.WriteLine);
-                            appendASM("    mov [rsp + " + (stackSize - identifiers.IndexOf(functions[l][paramCount]) + funcOffset) * 8 + "], rdi ;; 1");
+                            appendASM("    mov [rsp + " + (stackSize - identifiers.IndexOf(functions[l][paramCount]) + funcOffset) * 8 + "], rdi");
                             paramCount++;
                             if(peek().Value.type == TokenTypes.comma) {
                                 consume(TokenTypes.comma);
@@ -357,17 +345,6 @@ class Generator {
                     handleScope();
                     break;
             }
-
         }
     }
 }
-
-/*
-Console.WriteLine("stackSize: " + stackSize);
-Console.WriteLine("identifiers.Count: " + identifiers.Count);
-    Console.WriteLine("functions[l][paramCount]: " + functions[l][paramCount]);
-    Console.WriteLine("identifiers.index: " + identifiers.IndexOf(peek().Value.value));
-Console.WriteLine("identifiers.index: " + identifiers.IndexOf(functions[l][paramCount]));
-Console.WriteLine("funcOffset: " + funcOffset);
-identifiers.ForEach(Console.WriteLine);
-*/
