@@ -33,6 +33,12 @@ Boolean logic:
 
 *note - can only be used as part of \<condition> until bool type is implemented.*
 
+Comments:
+
+`// <text> ;`
+
+*note - can be multiline, single line or even inline, however the comment will end at the first semicolon(for now)*
+
 Selection:
 
 ```
