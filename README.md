@@ -86,5 +86,3 @@ func <identifier>(<param1>, <param2>...){
 Exit:
 
 `exit(<8 bit exit code)>);`
-
-*note - must be included otherwise program will compile then seg fault.*
