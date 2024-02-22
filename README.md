@@ -85,3 +85,9 @@ Functions:
 Exit:
 
 `exit(<exit code)>);`
+
+<h1 align="center">TODO:</h1>
+
+- Test line numbers in errors
+- Add return values for functions
+- make changes to remove need for funcOffset
