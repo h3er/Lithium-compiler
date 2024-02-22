@@ -194,6 +194,9 @@ class Tokenizer {
                     case '/':
                         if(peek() == '/') {
                             while(peek() != ';') {
+                                if((char)peek() == '\n' || char.IsWhiteSpace((char)peek())){
+                                    lineNum++;
+                                }
                                 consume();
                             }
                             consume();
