@@ -47,7 +47,7 @@ enum TokenTypes {
     decrement
 }
 
-struct Token(TokenTypes t, string v = "", int l) {
+struct Token(TokenTypes t, int l, string v = "") {
     public readonly TokenTypes type = t;
     public readonly string value = v;
     public readonly int lineNum = l;
