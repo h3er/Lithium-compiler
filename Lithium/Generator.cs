@@ -7,6 +7,7 @@ namespace Lithium;
 class Generator {
     private int stackSize, labelCount, index = -1, funcOffset = -1;
     private string jumpCmd = "jz", endLabel;
+    private TokenTypes returnType;
     private readonly List<int> scopes = [];
     private readonly List<string> identifiers = [];
     private readonly Dictionary<string, List<string>> functions = new Dictionary<string, List<string>>();
@@ -23,7 +24,7 @@ class Generator {
 
     private Token consume(TokenTypes? check = null) {
         if (peek().Value.type != check && check != null) {
-            throw new Exception("Expected: " + check);
+            throw new Exception("Expected " + peek().Value.type + " on line " peek().Value.lineNum);
         }
         index++;
         return tokens[index];
@@ -137,6 +138,40 @@ class Generator {
             stackSize = scopes.Last();
             scopes.RemoveAt(scopes.Count - 1);
         }
+    }
+
+    private void handleFunction(){
+        appendASM("; func begin");
+        if(returnType != TokenTypes._void){
+            push("194");
+        }
+        string label = createLabel();
+        string otherLabel = createLabel();
+        string name = consume(TokenTypes.identifier).value;
+        functions.Add(name, [label]);
+        while(peek().Value.type != TokenTypes.closeParen) {
+            if(peek().Value.type == TokenTypes.identifier) {
+                identifiers.Add(peek().Value.value);
+                functions[name].Add(consume(TokenTypes.identifier).value);
+                push("193");
+            } else {
+                consume(TokenTypes.comma);
+            }
+        }
+        consume(TokenTypes.closeParen);
+        handleScope();
+        identifiers.Add("peenisnsi");
+        appendASM("    jmp " + otherLabel);
+        appendASM(label + ":");
+        funcOffset++;
+        generateCode(TokenTypes.closeCurley);
+        if (peek().Value.type == TokenTypes.closeCurley)
+        {
+            handleScope();   
+        }
+        appendASM(otherLabel + ":");
+        funcOffset--;
+        appendASM("; func end");
     }
 
     private string createLabel() {
@@ -268,43 +303,12 @@ class Generator {
                     appendASM(otherLabel + ":");
                     appendASM("; while end");
                     break;
-                case TokenTypes._func:
-                    appendASM("; func begin");
-                    consume(TokenTypes._func);
-                    label = createLabel();
-                    otherLabel = createLabel();
-                    string name = consume(TokenTypes.identifier).value;
-                    functions.Add(name, [label]);
-                    while(peek().Value.type != TokenTypes.closeParen) {
-                        if(peek().Value.type == TokenTypes.identifier) {
-                            identifiers.Add(peek().Value.value);
-                            functions[name].Add(consume(TokenTypes.identifier).value);
-                            push("193");
-                        } else {
-                            consume(TokenTypes.comma);
-                        }
-                    }
-                    consume(TokenTypes.closeParen);
-                    handleScope();
-                    identifiers.Add("peenisnsi");
-                    appendASM("    jmp " + otherLabel);
-                    appendASM(label + ":");
-                    funcOffset++;
-                    generateCode(TokenTypes.closeCurley);
-                    if (peek().Value.type == TokenTypes.closeCurley)
-                    {
-                        handleScope();   
-                    }
-                    appendASM(otherLabel + ":");
-                    funcOffset--;
-                    appendASM("; func end");
-                    break;
                 case TokenTypes._return:
                     appendASM("; return begin");
                     consume(TokenTypes._return);
                     if(peek().Value.type == TokenTypes.semi) {
                         consume(TokenTypes.semi);
-                        handleScope();
+                        handleScope(); //??? how does this work??????
                         appendASM("    ret");
                         appendASM("; return end");
                         return;
@@ -314,10 +318,15 @@ class Generator {
                     }
                 case TokenTypes._int:
                     consume(TokenTypes._int);
-                    identifiers.Add(consume(TokenTypes.identifier).value);
-                    consume(TokenTypes.eq);
-                    evalExpr();
-                    consume(TokenTypes.semi);
+                    if(peek(2).Value.type == TokenTypes.openParen){
+                        returnType = TokenTypes._int;
+                        handleFunction();
+                    } else{
+                        identifiers.Add(consume(TokenTypes.identifier).value);
+                        consume(TokenTypes.eq);
+                        evalExpr();
+                        consume(TokenTypes.semi);
+                    }
                     break;
                 case TokenTypes.identifier:
                     string l = consume(TokenTypes.identifier).value;
