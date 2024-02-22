@@ -11,7 +11,6 @@ enum TokenTypes {
     _else,
     _for,
     _while,
-    _func,
     _return,
     //not keywords
     identifier,
@@ -48,7 +47,8 @@ enum TokenTypes {
     decrement
 }
 
-struct Token(TokenTypes t, string v = "") {
+struct Token(TokenTypes t, string v = "", int l) {
     public readonly TokenTypes type = t;
     public readonly string value = v;
+    public readonly int lineNum = l;
 }
