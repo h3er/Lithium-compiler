@@ -73,16 +73,15 @@ while(<condition>){
 
 Functions:
 
+**NOT CURRENTLY WORKING**
+
 ```
-func <identifier>(<param1>, <param2>...){
+<return type> <identifier>(<param1>, <param2>...){
     //do something;
     return;
 }
 ```
-*note - currently will throw error if there is a return value, however return must be there otherwise program will compile then seg fault.*
-
-*function syntax will change soon when return values are implemented.*
 
 Exit:
 
-`exit(<8 bit exit code)>);`
+`exit(<exit code)>);`
