@@ -203,7 +203,13 @@ class Tokenizer {
                 }
             }
         }
-        //foreach(var t in tokens) { Console.WriteLine(Convert.ToString(t.type), t.value); }
+        if(!tokens.Contains(TokenTypes._exit)){
+            tokens.Add(new Token(TokenTypes._exit));
+            tokens.Add(new Token(TokenTypes.openParen));
+            tokens.Add(new Token(TokenTypes.intLit, 192));
+            tokens.Add(new Token(TokenTypes.closeParen));
+            tokens.Add(new Token(TokenTypes.semi));
+        }
         return tokens;
     }
 }
