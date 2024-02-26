@@ -28,6 +28,8 @@ enum TokenTypes {
     openSquare,
     closeSquare,
     comma,
+    quote,
+    dQuote,
     semi,
     eq,
     add,
