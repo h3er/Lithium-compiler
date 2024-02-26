@@ -7,7 +7,6 @@ namespace Lithium;
 class Generator {
     private int stackSize, labelCount, index = -1, funcOffset = -1;
     private string jumpCmd = "jz", endLabel;
-    private TokenTypes returnType;
     private readonly List<int> scopes = [];
     private readonly List<string> identifiers = [];
     private readonly Dictionary<string, List<string>> functions = new Dictionary<string, List<string>>();
@@ -140,10 +139,10 @@ class Generator {
         }
     }
 
-    private void handleFunction(){
+    private void handleFunction(TokenType returnType){
         appendASM("; func begin");
         if(returnType != TokenTypes._void){
-            push("194");
+            push("1 ; return value loc");
         }
         string label = createLabel();
         string otherLabel = createLabel();
@@ -153,7 +152,7 @@ class Generator {
             if(peek().Value.type == TokenTypes.identifier) {
                 identifiers.Add(peek().Value.value);
                 functions[name].Add(consume(TokenTypes.identifier).value);
-                push("193");
+                push("1 ; params");
             } else {
                 consume(TokenTypes.comma);
             }
@@ -165,8 +164,7 @@ class Generator {
         appendASM(label + ":");
         funcOffset++;
         generateCode(TokenTypes.closeCurley);
-        if (peek().Value.type == TokenTypes.closeCurley)
-        {
+        if (peek().Value.type == TokenTypes.closeCurley) {
             handleScope();   
         }
         appendASM(otherLabel + ":");
@@ -316,11 +314,13 @@ class Generator {
                         //check return type, if it returns create extra space at the top of the stack for value
                         throw new Exception("Not implemented");
                     }
+                case TokenTypes._void:
+                    handleFunction(TokenTypes._void);
+                    break;
                 case TokenTypes._int:
                     consume(TokenTypes._int);
                     if(peek(2).Value.type == TokenTypes.openParen){
-                        returnType = TokenTypes._int;
-                        handleFunction();
+                        handleFunction(TokenTypes._int);
                     } else{
                         identifiers.Add(consume(TokenTypes.identifier).value);
                         consume(TokenTypes.eq);
@@ -335,23 +335,23 @@ class Generator {
                         if(peek().Value.type == TokenTypes.increment || peek().Value.type == TokenTypes.decrement) {
                             appendASM("    mov rdi, QWORD [rsp + " + (identifiers.Count - loc + funcOffset) * 8 + "]");
                             appendASM(consume().type == TokenTypes.increment ? "    inc rdi" : "    dec rdi");
-                            appendASM("    mov [rsp + " + (identifiers.Count - loc + funcOffset) * 8 + "], rdi");
                         } else {
                             consume(TokenTypes.eq);
                             evalExpr();
                             pop("rdi");
-                            appendASM("    mov [rsp + " + (identifiers.Count - loc + funcOffset) * 8 + "], rdi");
                         }
+                        appendASM("    mov [rsp + " + (identifiers.Count - loc + funcOffset) * 8 + "], rdi");
                         consume(TokenTypes.semi);
                     } else {
                         int paramCount = 1;
                         consume(TokenTypes.openParen);
                         while(peek().Value.type != TokenTypes.closeParen) {
+                            //appendASM("mov rdi, " + peek().Value.type == TokenTypes.intLit ? consume(TokenTypes.intLit).value + "" : QWORD [rsp + " + (identifiers.Count - identifiers.IndexOf(consume(TokenTypes.identifier).value) + funcOffset) * 8 + "]");
                             if(peek().Value.type == TokenTypes.intLit) {
                                 appendASM("    mov rdi, " + consume(TokenTypes.intLit).value + "");
                             } else {
                                 appendASM("    mov rdi, QWORD [rsp + " + (identifiers.Count - identifiers.IndexOf(consume(TokenTypes.identifier).value) + funcOffset) * 8 + "]");
-                            }
+                            }    
                             appendASM("    mov [rsp + " + (stackSize - identifiers.IndexOf(functions[l][paramCount]) + funcOffset) * 8 + "], rdi");
                             paramCount++;
                             if(peek().Value.type == TokenTypes.comma) {
