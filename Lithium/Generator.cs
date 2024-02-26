@@ -13,6 +13,10 @@ class Generator {
     public List<Token> tokens = [];
     public string asm = "global _start\n_start:\n";
 
+    public void Generator(List<Token> t) {
+        tokens = t;
+    }
+
     private Token? peek(int n = 1) {
         if(index + n < tokens.Count) {
             return tokens[index + n];
