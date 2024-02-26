@@ -1,7 +1,14 @@
-int x = 98;
+void add(int num1, int num2){
+    exit(num1 + num2);
+}
 
-int u = 7;
+void sub(int num1, int num2){
+    if(num1 >= num2){
+        exit(num1 - num2);
+    }else{
+        exit(num2 - num1);
+    }
+}
 
-x = x - u;
 
-exit(x);
+exit(0);
