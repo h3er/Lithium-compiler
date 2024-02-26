@@ -204,6 +204,15 @@ class Tokenizer {
                             tokens.Add(new Token(TokenTypes.div, lineNum));
                         }
                         break;
+                    case '"':
+                        while(peek().Value != '"'){
+                            buf += consume();
+                        }
+                        tokens.Add(new Token(TokenTypes._char, buf, lineNum));
+                        buf = "";
+                        break;
+                    case '\'':
+                        break;
                 }
             }
         }
