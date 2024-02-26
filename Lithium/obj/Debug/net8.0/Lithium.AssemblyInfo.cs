@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Lithium")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c43c561e6b875f6698d61725455d7db7c8f30974")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+63ae44b4afd0ef045b5729c18aeb9f09f578e425")]
 [assembly: System.Reflection.AssemblyProductAttribute("Lithium")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Lithium")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

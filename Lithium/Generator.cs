@@ -4,18 +4,13 @@
 
 namespace Lithium;
 
-class Generator {
+class Generator(List<Token> tokens) {
     private int stackSize, labelCount, index = -1, funcOffset = -1;
     private string jumpCmd = "jz", endLabel;
     private readonly List<int> scopes = [];
     private readonly List<string> identifiers = [];
     private readonly Dictionary<string, List<string>> functions = new Dictionary<string, List<string>>();
-    public List<Token> tokens = [];
     public string asm = "global _start\n_start:\n";
-
-    public void Generator(List<Token> t) {
-        tokens = t;
-    }
 
     private Token? peek(int n = 1) {
         if(index + n < tokens.Count) {
@@ -27,7 +22,8 @@ class Generator {
 
     private Token consume(TokenTypes? check = null) {
         if (peek().Value.type != check && check != null) {
-            throw new Exception("Expected " + peek().Value.type + " on line " peek().Value.lineNum);
+            Console.WriteLine(peek().Value.type);
+            throw new Exception("Expected " + check.Value + " on line " + peek().Value.lineNum);
         }
         index++;
         return tokens[index];
@@ -143,22 +139,22 @@ class Generator {
         }
     }
 
-    private void handleFunction(TokenType returnType){
-        appendASM("; func begin");
+    private void handleFunction(TokenTypes returnType){
         if(returnType != TokenTypes._void){
-            push("1 ; return value loc");
+            push("1");
         }
         string label = createLabel();
         string otherLabel = createLabel();
         string name = consume(TokenTypes.identifier).value;
         functions.Add(name, [label]);
+        consume(TokenTypes.openParen);
         while(peek().Value.type != TokenTypes.closeParen) {
             if(peek().Value.type == TokenTypes.identifier) {
                 identifiers.Add(peek().Value.value);
                 functions[name].Add(consume(TokenTypes.identifier).value);
-                push("1 ; params");
+                push("1");
             } else {
-                consume(TokenTypes.comma);
+                consume();
             }
         }
         consume(TokenTypes.closeParen);
@@ -173,7 +169,6 @@ class Generator {
         }
         appendASM(otherLabel + ":");
         funcOffset--;
-        appendASM("; func end");
     }
 
     private string createLabel() {
@@ -184,7 +179,6 @@ class Generator {
         while(peek() != null && peek().Value.type != condition) {
             switch(peek().Value.type) {
                 case TokenTypes._exit:
-                    appendASM("; exit begin");
                     consume(TokenTypes._exit);
                     consume(TokenTypes.openParen);
                     evalExpr();
@@ -193,12 +187,10 @@ class Generator {
                     pop("rdi");
                     appendASM("    mov rax, 60");
                     appendASM("    syscall");
-                    appendASM("; exit end");
                     break;
                 case TokenTypes._if:
                     int oldStackSize = stackSize;
                     string label = createLabel();
-                    appendASM("; if begin");
                     consume(TokenTypes._if);
                     consume(TokenTypes.openParen);
                     evalExpr();
@@ -222,12 +214,10 @@ class Generator {
                     } else {
                         appendASM(label + ":");
                     }
-                    appendASM("; if end");
                     break;
                 case TokenTypes._elif:
                     oldStackSize = stackSize;
                     label = createLabel();
-                    appendASM("; elif begin");
                     consume(TokenTypes._elif);
                     consume(TokenTypes.openParen);
                     evalExpr();
@@ -252,18 +242,14 @@ class Generator {
                         appendASM("    jmp " + endLabel);
                         appendASM(endLabel + ":");
                     }
-                    appendASM("; elif end");
                     break;
                 case TokenTypes._else:
-                    appendASM("; else begin");
                     consume(TokenTypes._else);
                     generateCode(TokenTypes.closeCurley);
                     appendASM("    jmp " + endLabel);
                     appendASM(endLabel + ":");
-                    appendASM("; else end");
                     break;
                 case TokenTypes._for:
-                    appendASM("; for begin");
                     label = createLabel();
                     string otherLabel = createLabel();
                     consume(TokenTypes._for);
@@ -278,10 +264,8 @@ class Generator {
                     appendASM("    jz " + otherLabel);
                     appendASM("    jmp " + label);
                     appendASM(otherLabel + ":");
-                    appendASM("; for end");
                     break;
                 case TokenTypes._while:
-                    appendASM("; while begin");
                     label = createLabel();
                     otherLabel = createLabel();
                     oldStackSize = stackSize;
@@ -303,22 +287,20 @@ class Generator {
                     appendASM("    jmp " + label);
                     handleScope();
                     appendASM(otherLabel + ":");
-                    appendASM("; while end");
                     break;
                 case TokenTypes._return:
-                    appendASM("; return begin");
                     consume(TokenTypes._return);
                     if(peek().Value.type == TokenTypes.semi) {
                         consume(TokenTypes.semi);
                         handleScope(); //??? how does this work??????
                         appendASM("    ret");
-                        appendASM("; return end");
                         return;
                     } else {
                         //check return type, if it returns create extra space at the top of the stack for value
                         throw new Exception("Not implemented");
                     }
                 case TokenTypes._void:
+                    consume(TokenTypes._void);
                     handleFunction(TokenTypes._void);
                     break;
                 case TokenTypes._int:

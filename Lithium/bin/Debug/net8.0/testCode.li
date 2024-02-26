@@ -2,13 +2,14 @@ void add(int num1, int num2){
     exit(num1 + num2);
 }
 
-void sub(int num1, int num2){
-    if(num1 >= num2){
-        exit(num1 - num2);
+void sub(int num3, int num4){
+    if(num3 >= num4){
+        exit(num3 - num4);
     }else{
-        exit(num2 - num1);
+        exit(num4 - num3);
     }
 }
 
+add(80, 4);
 
-exit(0);
+exit(99);

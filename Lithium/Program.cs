@@ -6,9 +6,7 @@ static class Compiler {
             throw new Exception("No source file given");
         }
         Tokenizer tok = new Tokenizer(args[0]);
-        Generator gen = new Generator{
-            tokens = tok.tokenizeCode()
-        };
+        Generator gen = new Generator(tok.tokenizeCode());
         gen.generateCode();
         using StreamWriter sw =  new StreamWriter("testCode.asm");
         sw.Write(gen.asm);

@@ -5,7 +5,7 @@ using System.Text;
 namespace Lithium;
 
 class Tokenizer {
-    private int index = -1, lineNum = 0;
+    private int index = -1, lineNum;
     private readonly string code;
 
     public Tokenizer(string path)
@@ -29,12 +29,13 @@ class Tokenizer {
     public List<Token> tokenizeCode() {
         List<Token> tokens = [];
         string buf = "";
-        while(peek() != null) {
-            if(Char.IsLetter((char)peek())) {
-                while(Char.IsLetterOrDigit((char)peek())) {
+        while (peek() != null) {
+            if (Char.IsLetter((char)peek())) {
+                while (Char.IsLetterOrDigit((char)peek())) {
                     buf += consume();
                 }
-                switch(buf) {
+
+                switch (buf) {
                     case "exit":
                         tokens.Add(new Token(TokenTypes._exit, lineNum));
                         break;
@@ -56,9 +57,6 @@ class Tokenizer {
                     case "while":
                         tokens.Add(new Token(TokenTypes._while, lineNum));
                         break;
-                    case "func":
-                        tokens.Add(new Token(TokenTypes._func, lineNum));
-                        break;
                     case "return":
                         tokens.Add(new Token(TokenTypes._return, lineNum));
                         break;
@@ -75,41 +73,46 @@ class Tokenizer {
                         tokens.Add(new Token(TokenTypes._void, lineNum));
                         break;
                     default:
-                        tokens.Add(new Token(TokenTypes.identifier, buf, lineNum));
+                        tokens.Add(new Token(TokenTypes.identifier, lineNum, buf));
                         break;
 
-                        /*
-                        tokens.Add( buf switch {
-                        "exit" => new Token(TokenTypes._exit, lineNum),
-                        "print" => new Token(TokenTypes._print, lineNum),
-                        "if" => new Token(TokenTypes._if, lineNum),
-                        "elif" => tokens.Add(new Token(TokenTypes._elif, lineNum),
-                        "else" => tokens.Add(new Token(TokenTypes._else, lineNum),
-                        "for" => tokens.Add(new Token(TokenTypes._for, lineNum),
-                        "while" => tokens.Add(new Token(TokenTypes._while, lineNum),
-                        "func" => tokens.Add(new Token(TokenTypes._func, lineNum),
-                        "return" => tokens.Add(new Token(TokenTypes._return, lineNum),
-                        "int" => tokens.Add(new Token(TokenTypes._int, lineNum),
-                        "bool" => tokens.Add(new Token(TokenTypes._bool, lineNum),
-                        "char" => tokens.Add(new Token(TokenTypes._char, lineNum),
-                        "void" => tokens.Add(new Token(TokenTypes._void, lineNum),
-                        _ => tokens.Add(new Token(TokenTypes.identifier, buf, lineNum)
-                        });
-                        */
+                    /*
+                    tokens.Add( buf switch {
+                    "exit" => new Token(TokenTypes._exit, lineNum),
+                    "print" => new Token(TokenTypes._print, lineNum),
+                    "if" => new Token(TokenTypes._if, lineNum),
+                    "elif" => tokens.Add(new Token(TokenTypes._elif, lineNum),
+                    "else" => tokens.Add(new Token(TokenTypes._else, lineNum),
+                    "for" => tokens.Add(new Token(TokenTypes._for, lineNum),
+                    "while" => tokens.Add(new Token(TokenTypes._while, lineNum),
+                    "func" => tokens.Add(new Token(TokenTypes._func, lineNum),
+                    "return" => tokens.Add(new Token(TokenTypes._return, lineNum),
+                    "int" => tokens.Add(new Token(TokenTypes._int, lineNum),
+                    "bool" => tokens.Add(new Token(TokenTypes._bool, lineNum),
+                    "char" => tokens.Add(new Token(TokenTypes._char, lineNum),
+                    "void" => tokens.Add(new Token(TokenTypes._void, lineNum),
+                    _ => tokens.Add(new Token(TokenTypes.identifier, buf, lineNum)
+                    });
+                    */
                 }
+
                 buf = "";
 
-            } else if(Char.IsDigit((char)peek())) {
-                while(Char.IsDigit((char)peek())) {
+            }
+            else if (Char.IsDigit((char)peek())) {
+                while (Char.IsDigit((char)peek())) {
                     buf += consume();
                 }
-                tokens.Add(new Token(TokenTypes.intLit, buf, lineNum));
+
+                tokens.Add(new Token(TokenTypes.intLit, lineNum, buf));
                 buf = "";
-            } else if((char)peek() == ' ' || (char)peek() == '\n' || char.IsWhiteSpace((char)peek())) {
+            }
+            else if ((char)peek() == ' ' || (char)peek() == '\n' || char.IsWhiteSpace((char)peek())) {
                 consume();
                 lineNum++;
-            } else {
-                switch(consume()) {
+            }
+            else {
+                switch (consume()) {
                     case ';':
                         tokens.Add(new Token(TokenTypes.semi, lineNum));
                         break;
@@ -135,36 +138,44 @@ class Tokenizer {
                         tokens.Add(new Token(TokenTypes.comma, lineNum));
                         break;
                     case '=':
-                        if(peek() == '=') {
+                        if (peek() == '=') {
                             tokens.Add(new Token(TokenTypes.eqTo, lineNum));
                             consume();
-                        } else {
+                        }
+                        else {
                             tokens.Add(new Token(TokenTypes.eq, lineNum));
                         }
+
                         break;
                     case '>':
-                        if(peek() == '=') {
+                        if (peek() == '=') {
                             tokens.Add(new Token(TokenTypes.greaterThanEq, lineNum));
                             consume();
-                        } else {
+                        }
+                        else {
                             tokens.Add(new Token(TokenTypes.greaterThan, lineNum));
                         }
+
                         break;
                     case '<':
-                        if(peek() == '=') {
+                        if (peek() == '=') {
                             tokens.Add(new Token(TokenTypes.lessThanEq, lineNum));
                             consume();
-                        } else {
+                        }
+                        else {
                             tokens.Add(new Token(TokenTypes.lessThan, lineNum));
                         }
+
                         break;
                     case '!':
-                        if(peek() == '=') {
+                        if (peek() == '=') {
                             tokens.Add(new Token(TokenTypes.notEqTo, lineNum));
                             consume();
-                        } else {
+                        }
+                        else {
                             tokens.Add(new Token(TokenTypes.not, lineNum));
                         }
+
                         break;
                     case '&':
                         tokens.Add(new Token(TokenTypes.and, lineNum));
@@ -173,55 +184,57 @@ class Tokenizer {
                         tokens.Add(new Token(TokenTypes.or, lineNum));
                         break;
                     case '+':
-                        if(peek() == '+') {
+                        if (peek() == '+') {
                             consume();
                             tokens.Add(new Token(TokenTypes.increment, lineNum));
-                        } else {
+                        }
+                        else {
                             tokens.Add(new Token(TokenTypes.add, lineNum));
                         }
+
                         break;
                     case '-':
-                        if(peek() == '-') {
+                        if (peek() == '-') {
                             consume();
                             tokens.Add(new Token(TokenTypes.decrement, lineNum));
-                        } else {
+                        }
+                        else {
                             tokens.Add(new Token(TokenTypes.sub, lineNum));
                         }
+
                         break;
                     case '*':
                         tokens.Add(new Token(TokenTypes.mul, lineNum));
                         break;
                     case '/':
-                        if(peek() == '/') {
-                            while(peek() != ';') {
-                                if((char)peek() == '\n' || char.IsWhiteSpace((char)peek())){
+                        if (peek() == '/') {
+                            while (peek() != ';') {
+                                if ((char)peek() == '\n' || char.IsWhiteSpace((char)peek())) {
                                     lineNum++;
                                 }
+
                                 consume();
                             }
+
                             consume();
-                        } else {
+                        }
+                        else {
                             tokens.Add(new Token(TokenTypes.div, lineNum));
                         }
+
                         break;
                     case '"':
-                        while(peek().Value != '"'){
+                        while (peek().Value != '"') {
                             buf += consume();
                         }
-                        tokens.Add(new Token(TokenTypes._char, buf, lineNum));
+
+                        tokens.Add(new Token(TokenTypes._char, lineNum, buf));
                         buf = "";
                         break;
                     case '\'':
                         break;
                 }
             }
-        }
-        if(!tokens.Contains(TokenTypes._exit)){
-            tokens.Add(new Token(TokenTypes._exit, 0));
-            tokens.Add(new Token(TokenTypes.openParen, 0));
-            tokens.Add(new Token(TokenTypes.intLit, 192, 0));
-            tokens.Add(new Token(TokenTypes.closeParen, 0));
-            tokens.Add(new Token(TokenTypes.semi, 0));
         }
         return tokens;
     }
